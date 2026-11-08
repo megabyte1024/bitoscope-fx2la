@@ -1,0 +1,11 @@
+# Build trees
+/build*/
+
+# Firmware fetched by cmake/FetchSigrokFirmware.cmake; not part of this repo.
+/third_party/
+
+__pycache__/
+
+# Captures and logs from test runs
+*.h5
+*.log

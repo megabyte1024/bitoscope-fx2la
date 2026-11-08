@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2026 megabyte1024
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+cmake_host_system_information(RESULT BITOSCOPE_PHYSICAL_CORES QUERY NUMBER_OF_PHYSICAL_CORES)
+if(NOT BITOSCOPE_PHYSICAL_CORES GREATER 0)
+  set(BITOSCOPE_PHYSICAL_CORES 1)
+endif()
+
+if(CMAKE_SCRIPT_MODE_FILE)
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E echo "${BITOSCOPE_PHYSICAL_CORES}")
+  return()
+endif()
+
+set(BITOSCOPE_BUILD_JOBS "${BITOSCOPE_PHYSICAL_CORES}" CACHE STRING
+    "Most compile and link jobs at once (Ninja); at most the number of physical CPU cores")
+if(NOT BITOSCOPE_BUILD_JOBS MATCHES "^[0-9]+$" OR BITOSCOPE_BUILD_JOBS LESS 1
+   OR BITOSCOPE_BUILD_JOBS GREATER BITOSCOPE_PHYSICAL_CORES)
+  message(WARNING "BITOSCOPE_BUILD_JOBS=${BITOSCOPE_BUILD_JOBS} is not between 1 and "
+                  "${BITOSCOPE_PHYSICAL_CORES} physical CPU cores; ${BITOSCOPE_PHYSICAL_CORES} used")
+  set(BITOSCOPE_BUILD_JOBS "${BITOSCOPE_PHYSICAL_CORES}" CACHE STRING
+      "Most compile and link jobs at once (Ninja); at most the number of physical CPU cores" FORCE)
+endif()
+
+set_property(GLOBAL APPEND PROPERTY JOB_POOLS bitoscope_build_jobs=${BITOSCOPE_BUILD_JOBS})
+set(CMAKE_JOB_POOL_COMPILE bitoscope_build_jobs)
+set(CMAKE_JOB_POOL_LINK bitoscope_build_jobs)
+
+# WHY: MSBuild compiles one file at a time; /MP<jobs> with one project at a time keeps to core limit.
+if(CMAKE_GENERATOR MATCHES "^Visual Studio")
+  add_compile_options("$<$<OR:$<COMPILE_LANG_AND_ID:C,MSVC>,$<COMPILE_LANG_AND_ID:CXX,MSVC>>:/MP${BITOSCOPE_BUILD_JOBS}>")
+endif()
