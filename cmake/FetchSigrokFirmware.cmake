@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+cmake_minimum_required(VERSION 3.30...4.4)
+
 set(FX2LA_FIRMWARE_VERSION 0.1.7)
 set(FX2LA_FIRMWARE_SHA256 c876fd075549e7783a6d5bfc8d99a695cfc583ddbcea0217d8e3f9351d1723af)
 set(FX2LA_FIRMWARE_NAME "sigrok-firmware-fx2lafw-bin-${FX2LA_FIRMWARE_VERSION}")

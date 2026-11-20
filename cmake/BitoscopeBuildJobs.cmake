@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+cmake_minimum_required(VERSION 3.30...4.4)
+
 cmake_host_system_information(RESULT BITOSCOPE_PHYSICAL_CORES QUERY NUMBER_OF_PHYSICAL_CORES)
 if(NOT BITOSCOPE_PHYSICAL_CORES GREATER 0)
   set(BITOSCOPE_PHYSICAL_CORES 1)
