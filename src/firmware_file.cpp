@@ -23,6 +23,7 @@
 #include <format>
 #include <fstream>
 #include <iterator>
+#include <memory>
 #include <system_error>
 
 #ifdef _WIN32
@@ -42,9 +43,18 @@ constexpr const char* kFirmwareFolderName = "sigrok-firmware";
 constexpr const char* kEnvironmentName = "SIGROK_FIRMWARE_DIR";
 
 std::optional<std::string> environmentValue(const char* name) {
+#ifdef _MSC_VER
+  char* raw = nullptr;
+  size_t length = 0;
+  if (_dupenv_s(&raw, &length, name) != 0 || raw == nullptr) return std::nullopt;
+  const std::unique_ptr<char, decltype(&std::free)> value(raw, &std::free);
+  if (value.get()[0] == '\0') return std::nullopt;
+  return std::string(value.get());
+#else
   const char* value = std::getenv(name);
   if (value == nullptr || value[0] == '\0') return std::nullopt;
   return std::string(value);
+#endif
 }
 
 #ifdef _WIN32
